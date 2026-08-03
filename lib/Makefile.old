@@ -1,0 +1,25 @@
+#
+# A minimal makefile
+#
+
+CFLAGS=-Wall -O2 -march=native -I../include -DLINUX
+#CFLAGS=-Wall -ggdb3 -O -rdynamic -I../include -DLINUX
+
+L=libcrypto.a
+
+OBJ= $L(secure.o) $L(sha1.o) $L(sha256.o) $L(sha512.o) $L(hmac_sha1.o) $L(hmac_sha256.o) $L(hmac_sha512.o)
+
+$L : $(OBJ)
+	-ranlib $L
+	@echo "$L is up to date"
+#       @echo "To link via command line we must also have a library name 'libxxxx.a'"
+#       ln -sf $L lib$L
+
+.dep depend:
+	touch .dep
+	-makedepend -I../include *.c -f .dep
+
+clean:
+	rm -f *.[oa] *~ .dep
+
+-include .dep

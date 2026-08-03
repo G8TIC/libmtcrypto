@@ -1,0 +1,8 @@
+#ifdef _SECURE_MEM_H
+#define _SECURE_MEM_H
+
+#include <stddef.h>
+
+void secure_clear(void *, size_t);
+
+#endif
