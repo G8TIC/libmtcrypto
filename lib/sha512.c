@@ -53,6 +53,7 @@ static const uint64_t k[80] = {
     0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817
 };
 
+
 static void sha512_transform(sha512_ctx_t *ctx, const uint8_t block[SHA512_BLOCK_SIZE])
 {
     uint64_t w[80];
@@ -101,6 +102,7 @@ static void sha512_transform(sha512_ctx_t *ctx, const uint8_t block[SHA512_BLOCK
     ctx->state[7] += h;
 }
 
+
 void sha512_init(sha512_ctx_t *ctx)
 {
     ctx->state[0] = 0x6a09e667f3bcc908ULL;
@@ -117,6 +119,7 @@ void sha512_init(sha512_ctx_t *ctx)
     /* buffer need not be cleared here */
 }
 
+
 static void sha512_add_bits(sha512_ctx_t *ctx, size_t byte_count)
 {
     /* add byte_count * 8 to 128-bit bit length stored as high/low */
@@ -129,32 +132,36 @@ static void sha512_add_bits(sha512_ctx_t *ctx, size_t byte_count)
     }
 }
 
+
 void sha512_update(sha512_ctx_t *ctx, const void *data, size_t len)
 {
-    size_t i = 0;
+    if (data && len) {
+        const uint8_t *bytes = data;
+        size_t i = 0;
 
-    if (len == 0 || data == NULL) {
-        return;
-    }
+        while (len > 0) {
+            size_t to_copy = SHA512_BLOCK_SIZE - ctx->buffer_len;
 
-    while (len > 0) {
-        size_t to_copy = SHA512_BLOCK_SIZE - ctx->buffer_len;
-        if (to_copy > len) to_copy = len;
+            if (to_copy > len)
+                to_copy = len;
 
-        memcpy(ctx->buffer + ctx->buffer_len, data + i, to_copy);
-        ctx->buffer_len += to_copy;
-        i += to_copy;
-        len -= to_copy;
+            memcpy(ctx->buffer + ctx->buffer_len, bytes + i, to_copy);
+        
+            ctx->buffer_len += to_copy;
+            i += to_copy;
+            len -= to_copy;
 
-        /* update bit length for the message bytes only */
-        sha512_add_bits(ctx, to_copy);
+            /* update bit length for the message bytes only */
+            sha512_add_bits(ctx, to_copy);
 
-        if (ctx->buffer_len == SHA512_BLOCK_SIZE) {
-            sha512_transform(ctx, ctx->buffer);
-            ctx->buffer_len = 0;
+            if (ctx->buffer_len == SHA512_BLOCK_SIZE) {
+                sha512_transform(ctx, ctx->buffer);
+                ctx->buffer_len = 0;
+            }
         }
     }
 }
+
 
 void sha512_final(sha512_ctx_t *ctx, uint8_t out[SHA512_DIGEST_SIZE])
 {
@@ -218,7 +225,7 @@ void sha512_final(sha512_ctx_t *ctx, uint8_t out[SHA512_DIGEST_SIZE])
 
 void sha512(uint8_t out[SHA512_DIGEST_SIZE], const void *data, size_t len)
 {
-    if (out && data && len) {
+    if (out) {
         sha512_ctx_t ctx;
 
         sha512_init(&ctx);

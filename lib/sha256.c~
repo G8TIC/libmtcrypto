@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "sha256.h"
+#include "secure.h"
 
 #define ch(x,y,z)       (((x) & (y)) ^ (~(x) & (z)))
 #define maj(x,y,z)      (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
@@ -110,7 +111,8 @@ void sha256_init(sha256_ctx_t *ctx)
     ctx->state[7] = 0x5be0cd19;
     ctx->bitlen = ctx->datalen = 0;
 
-    memset(ctx->data, 0, sizeof(ctx->data));
+    //memset(ctx->data, 0, sizeof(ctx->data));
+    secure_clear(ctx->data, sizeof(ctx->data));
 }
 
 
@@ -119,21 +121,29 @@ void sha256_init(sha256_ctx_t *ctx)
  */
 void sha256_update(sha256_ctx_t *ctx, const void *data, size_t len)
 {
-    size_t i = 0;
+    if (data && len) {
+        const uint8_t *bytes = data;
+        size_t i = 0;
 
-    while (len > 0) {
-        size_t to_copy = SHA256_BLOCK_SIZE - ctx->datalen;
-        if (to_copy > len) to_copy = len;
-        memcpy(ctx->data + ctx->datalen, data + i, to_copy);
-        ctx->datalen += to_copy;
-        i += to_copy;
-        len -= to_copy;
+        while (len > 0) {
+            size_t to_copy = SHA256_BLOCK_SIZE - ctx->datalen;
 
-        if (ctx->datalen == SHA256_BLOCK_SIZE) {
-            sha256_transform(ctx, ctx->data);
-            ctx->bitlen += (uint64_t)SHA256_BLOCK_SIZE * 8;
-            ctx->datalen = 0;
-            memset(ctx->data, 0, SHA256_BLOCK_SIZE);
+            if (to_copy > len)
+                to_copy = len;
+
+            memcpy(ctx->data + ctx->datalen, bytes + i, to_copy);
+
+            ctx->datalen += to_copy;
+            i += to_copy;
+            len -= to_copy;
+
+            if (ctx->datalen == SHA256_BLOCK_SIZE) {
+                sha256_transform(ctx, ctx->data);
+                ctx->bitlen += (uint64_t)SHA256_BLOCK_SIZE * 8;
+                ctx->datalen = 0;
+                //memset(ctx->data, 0, SHA256_BLOCK_SIZE);
+                //secure_clear(ctx->data, SHA256_BLOCK_SIZE);
+            }
         }
     }
 }
@@ -170,7 +180,8 @@ void sha256_final(sha256_ctx_t *ctx, uint8_t out[SHA256_DIGEST_SIZE])
         out[i*4+3]=(uint8_t)((ctx->state[i])     & 0xFF);
     }
 
-    memset(ctx, 0, sizeof(sha256_ctx_t));
+    //memset(ctx, 0, sizeof(sha256_ctx_t));
+    secure_clear(ctx, sizeof(sha256_ctx_t));
 }
 
 
@@ -179,12 +190,11 @@ void sha256_final(sha256_ctx_t *ctx, uint8_t out[SHA256_DIGEST_SIZE])
  */
 void sha256(uint8_t out[SHA256_DIGEST_SIZE], const void *data, size_t len)
 {
-    sha256_ctx_t ctx;
+    if (out) {
+        sha256_ctx_t ctx;
 
-    sha256_init(&ctx);
-
-    if (data && len > 0)
+        sha256_init(&ctx);
         sha256_update(&ctx, data, len);
-
-    sha256_final(&ctx, out);
+        sha256_final(&ctx, out);
+    }
 }

@@ -156,49 +156,44 @@ void sha1_init(sha1_ctx_t *ctx)
 
 void sha1_update(sha1_ctx_t *ctx, const void *data, size_t length)
 {
-    const uint8_t *input;
-    size_t copy_length;
+    if (data && length) {
+        const uint8_t *input = data;
+        size_t copy_length;
 
-    if (ctx == NULL || data == NULL || !length) {
-        return;
-    }
+        /*
+         * SHA-1 encodes the message length modulo 2^64 bits, so unsigned
+         * wraparound of total_length is intentional.
+         */
+        ctx->total_length += (uint64_t)length;
 
-    input = (const uint8_t *)data;
+        if (ctx->buffer_length != 0) {
+            copy_length = SHA1_BLOCK_SIZE - ctx->buffer_length;
 
-    /*
-     * SHA-1 encodes the message length modulo 2^64 bits, so unsigned
-     * wraparound of total_length is intentional.
-     */
-    ctx->total_length += (uint64_t)length;
+            if (copy_length > length)
+                copy_length = length;
 
-    if (ctx->buffer_length != 0) {
-        copy_length = SHA1_BLOCK_SIZE - ctx->buffer_length;
+            memcpy(&ctx->buffer[ctx->buffer_length], input, copy_length);
 
-        if (copy_length > length) {
-            copy_length = length;
+            ctx->buffer_length += copy_length;
+            input += copy_length;
+            length -= copy_length;
+
+            if (ctx->buffer_length == SHA1_BLOCK_SIZE) {
+                sha1_transform(ctx, ctx->buffer);
+                ctx->buffer_length = 0;
+            }
         }
 
-        memcpy(&ctx->buffer[ctx->buffer_length], input, copy_length);
-
-        ctx->buffer_length += copy_length;
-        input += copy_length;
-        length -= copy_length;
-
-        if (ctx->buffer_length == SHA1_BLOCK_SIZE) {
-            sha1_transform(ctx, ctx->buffer);
-            ctx->buffer_length = 0;
+        while (length >= SHA1_BLOCK_SIZE) {
+            sha1_transform(ctx, input);
+            input += SHA1_BLOCK_SIZE;
+            length -= SHA1_BLOCK_SIZE;
         }
-    }
 
-    while (length >= SHA1_BLOCK_SIZE) {
-        sha1_transform(ctx, input);
-        input += SHA1_BLOCK_SIZE;
-        length -= SHA1_BLOCK_SIZE;
-    }
-
-    if (length != 0) {
-        memcpy(ctx->buffer, input, length);
-        ctx->buffer_length = length;
+        if (length != 0) {
+            memcpy(ctx->buffer, input, length);
+            ctx->buffer_length = length;
+        }
     }
 }
 
@@ -238,7 +233,7 @@ void sha1_final(sha1_ctx_t *ctx, uint8_t digest[SHA1_DIGEST_SIZE])
 
 void sha1(uint8_t *out, const void *data, size_t length)
 {
-    if (out && data && length) {
+    if (out) {
         sha1_ctx_t ctx;
 
         sha1_init(&ctx);

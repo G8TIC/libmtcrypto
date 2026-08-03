@@ -121,22 +121,27 @@ void sha256_init(sha256_ctx_t *ctx)
  */
 void sha256_update(sha256_ctx_t *ctx, const void *data, size_t len)
 {
-    size_t i = 0;
+    if (data && len) {
+        const uint8_t *bytes = data;
+        size_t i = 0;
 
-    while (len > 0) {
-        size_t to_copy = SHA256_BLOCK_SIZE - ctx->datalen;
-        if (to_copy > len) to_copy = len;
-        memcpy(ctx->data + ctx->datalen, data + i, to_copy);
-        ctx->datalen += to_copy;
-        i += to_copy;
-        len -= to_copy;
+        while (len > 0) {
+            size_t to_copy = SHA256_BLOCK_SIZE - ctx->datalen;
 
-        if (ctx->datalen == SHA256_BLOCK_SIZE) {
-            sha256_transform(ctx, ctx->data);
-            ctx->bitlen += (uint64_t)SHA256_BLOCK_SIZE * 8;
-            ctx->datalen = 0;
-            //memset(ctx->data, 0, SHA256_BLOCK_SIZE);
-            secure_clear(ctx->data, SHA256_BLOCK_SIZE);
+            if (to_copy > len)
+                to_copy = len;
+
+            memcpy(ctx->data + ctx->datalen, bytes + i, to_copy);
+
+            ctx->datalen += to_copy;
+            i += to_copy;
+            len -= to_copy;
+
+            if (ctx->datalen == SHA256_BLOCK_SIZE) {
+                sha256_transform(ctx, ctx->data);
+                ctx->bitlen += (uint64_t)SHA256_BLOCK_SIZE * 8;
+                ctx->datalen = 0;
+            }
         }
     }
 }
@@ -183,7 +188,7 @@ void sha256_final(sha256_ctx_t *ctx, uint8_t out[SHA256_DIGEST_SIZE])
  */
 void sha256(uint8_t out[SHA256_DIGEST_SIZE], const void *data, size_t len)
 {
-    if (out && data && len) {
+    if (out) {
         sha256_ctx_t ctx;
 
         sha256_init(&ctx);
