@@ -54,7 +54,7 @@ the language so it should work on any C11 compliant compiler.
 While you can delve in to the innards and do things in parts, in most cases
 you just want the single shot function, for example:
 ```
-sha256(uint8_t *out, uint_t *data, size_t length)
+sha256(uint8_t *out, void *data, size_t length)
 ```
 
 ### Unit tests
