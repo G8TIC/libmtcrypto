@@ -47,5 +47,10 @@ echo "Testing HMAC-SHA512 ..."
 gcc -Wall -o hmac_sha512_test hmac_sha512_test.c -I../include -L ../lib/ -lmtcrypto
 ./hmac_sha512_test
 
+echo ""
+echo "Testing SHA512-CRYPT ..."
+gcc -Wall -o sha512_crypt_test sha512_crypt_test.c -I../include -L ../lib/ -lmtcrypto
+./sha512_crypt_test
+
 
 
