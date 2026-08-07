@@ -52,5 +52,10 @@ echo "Testing SHA512-CRYPT ..."
 gcc -Wall -o sha512_crypt_test sha512_crypt_test.c -I../include -L ../lib/ -lmtcrypto
 ./sha512_crypt_test
 
+echo ""
+echo "Testing TOTP authentication codes ..."
+gcc -Wall -o totp_test totp_test.c -I../include -L ../lib/ -lmtcrypto
+./totp_test
+
 
 

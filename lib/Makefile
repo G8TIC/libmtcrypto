@@ -8,7 +8,7 @@ DEPFLAGS = -MMD -MP
 
 LIBRARY  = libmtcrypto.a
 
-SOURCES  = sha1.c  sha256.c sha512.c hmac_sha1.c hmac_sha256.c hmac_sha512.c sha512_crypt.c secure.c
+SOURCES  = sha1.c sha256.c sha512.c hmac_sha1.c hmac_sha256.c hmac_sha512.c sha512_crypt.c secure.c base32.c totp_auth.c
 
 OBJECTS  = $(SOURCES:.c=.o)
 DEPFILES = $(OBJECTS:.o=.d)
