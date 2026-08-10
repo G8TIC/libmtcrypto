@@ -9,40 +9,44 @@ undesireable.
 
 ## Background
 
-I have been using SHA1, SHA256 and SHA512 in embedded systems they have existed but
-always with complex reference code, code borrowed from crypto libraries,
-or versions found on the internet with questional parentage such as those where
-ownership is claimed by Apple or Google.
+I have been using SHA1, SHA256 and SHA512 in embedded systems they have existed
+but with source code that was complex reference code, code borrowed from crypto
+libraries, or versions found on the internet with questional parentage such as
+those where copyright is claimed by Apple or Google.
 
 I decided that I needed to fix this ...
 
 ## Goals and objectives
 
-I decided that for embedded systems I needed my own implementation which:
+I decided that for embedded systems I needed my own implementation of SHA1,
+SHA256 and SHA512 along with their HMAC equivalents, that:
 
-* uses modern and clean, procedural C11 code
-* is designed for standalone use
-* is portable across a wide range of systems
-* is compiler agnostic
-* has simple API calling conventions
+* use modern and clean C code
+* are designed for standalone use
+* are portable across a wide range of systems
+* are compiler agnostic
+* have simple API calling conventions
 * is easy to read, understand and maintain
 * includes unit tests against NIST test vectors
-* uses a permissive license
+* employs a permissive license
 
 
 ### Modern and clean code
 
-Written to be modern and clean code using procedural C to the C11 standard.
+The routes here were Written to be modern and clean using procedural C to the C11 standard.
 
-### Standalone operation
+### Standalone
 
-Code is complete, standalone, and makes no use of libraries or third-party code.
+The routines here are complete, standalone, and makes no use of libraries or third-party code.
 
 ### Portable
 
 As the code is written in plain procedural C it should compile and work on a wide range of systems.
 
 To date its been used on 64-bit AMD (x86), 32-bit ARM and 64-bit ARM.
+
+Note: The code has only be developed and tested in Little Endian machines
+and is not expected to work on Big Endial without further modification.
 
 ### Compiler agnostic
 
@@ -51,17 +55,18 @@ the language so it should work on any C11 compliant compiler.
 
 ### Simple APIs
 
-While you can delve in to the innards and do things in parts, in most cases
-you just want the single shot function, for example:
+While you can delve in to the innards and do things in parts (i.e. streaming
+mode), in most cases you just want the single shot function, for example:
 ```
 sha256(uint8_t *out, void *data, size_t length)
 ```
 
 ### Unit tests
 
-Each module includes a test harness with the NIST test vectors.
+Each module includes a test harness with suitable test vectors - in many
+cases the NIST test vectors.
 
-All four modules can be tested using the unit_tests.sh script.
+All modules can be tested using the unit_tests.sh script.
 
 
 ## Organisation
@@ -73,7 +78,6 @@ lib -- contains the source code files and a Makefile to build the library
 include -- contains the header files to include in your projects
 
 tests -- a set of simple test programs and unit tests
-
 
 
 ### License
