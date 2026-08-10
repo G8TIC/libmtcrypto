@@ -45,8 +45,8 @@ As the code is written in plain procedural C it should compile and work on a wid
 
 To date its been used on 64-bit AMD (x86), 32-bit ARM and 64-bit ARM.
 
-Note: The code has only be developed and tested in Little Endian machines
-and is not expected to work on Big Endial without further modification.
+Note: The code has only be developed and tested on Little Endian machines and is not expected to work on Big Endian
+platforms without further modification.
 
 ### Compiler agnostic
 
