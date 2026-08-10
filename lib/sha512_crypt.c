@@ -1,19 +1,7 @@
 /*
- * sha512_crypt.c
+ * sha512_crypt.c - C implementation of SHA-512-crypt for "$6$" type passwords
+ * Author: Mike Tubby mike@tubby.org
  *
- * Procedural C11 implementation of Unix SHA-512-crypt, password type "$6$".
- *
- * Expected SHA-512 interface:
- *
- *     void sha512_init(sha512_context *context);
- *     void sha512_update(sha512_context *context,
- *                        const void *data,
- *                        size_t length);
- *     void sha512_final(sha512_context *context,
- *                       uint8_t digest[64]);
- *
- * This code does not generate random salts. Salt generation should use the
- * operating system CSPRNG, such as getrandom() on Linux.
  */
 
 #include <stdint.h>
@@ -41,6 +29,9 @@
 static const char crypt_base64[] = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 
+/*
+ * sha512_crypt_salt() - ghenerate random salt for a password
+ */
 int sha512_crypt_salt(char salt[SHA512_CRYPT_SALT_SIZE+1])
 {
     if (salt) {
@@ -54,10 +45,9 @@ int sha512_crypt_salt(char salt[SHA512_CRYPT_SALT_SIZE+1])
         salt[SHA512_CRYPT_SALT_SIZE] = '\0';
         secure_clear(buf, sizeof(buf));
         return 1;
-
-    } else {
-        return 0;
     }
+
+    return 0;
 }
 
 
@@ -532,7 +522,16 @@ static int compare_string_constant_time(const char *a, const char *b)
 
 
 /*
- * sha512_crypt_encrypt_password() - encrypt a password including generation of local salt
+ * sha512_crypt_encrypt_password() - encrypt a password
+ *
+ * This function takes a password, generates a 16-character random salt, encrypts
+ * the password with the sha512_crypt() function and salt and outputs the full
+ * string in teh form:
+ *
+ *	$6$abcddefghijklmnop$................................
+ *
+ * with the salt and encrypted password.
+ *
  */
 int sha512_crypt_encrypt_password(const char *password, char *output, size_t outlen)
 {
@@ -541,6 +540,7 @@ int sha512_crypt_encrypt_password(const char *password, char *output, size_t out
     int rc;
     
     sha512_crypt_salt(salt);
+    
     sprintf(buf, "%s%s$", SHA512_CRYPT_PREFIX, salt);    
     
     rc = sha512_crypt(password, buf, output, outlen);
@@ -551,6 +551,10 @@ int sha512_crypt_encrypt_password(const char *password, char *output, size_t out
 
 /*
  * sha512_crypt_verify_password() - Verify a password
+ *
+ * This function verifies the user supplied password against the $6$ sha512_crypt
+ * password in 'hash' and returns zero (invalid) or one (valid).
+ *
  */
 int sha512_crypt_verify_password(const char *password, const char *hash)
 {
