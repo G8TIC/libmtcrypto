@@ -1,5 +1,5 @@
 
-CC      ?= cc
+CC      = clang
 AR      ?= ar
 
 CPPFLAGS = -I../include -DLINUX

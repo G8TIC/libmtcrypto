@@ -143,4 +143,3 @@ void hmac_sha512(uint8_t out[HMAC_SHA512_DIGEST_SIZE], const uint8_t *key, size_
                 hmac_sha512_final(&ctx, out);
         }
 }
-        

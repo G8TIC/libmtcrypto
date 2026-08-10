@@ -21,8 +21,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define SHA1_BLOCK_SIZE  64
-#define SHA1_DIGEST_SIZE 20
+#define SHA1_BLOCK_SIZE  	64
+#define SHA1_DIGEST_SIZE 	20
 
 typedef struct sha1_ctx {
     uint32_t state[5];
