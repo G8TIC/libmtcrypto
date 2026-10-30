@@ -62,3 +62,13 @@ ${CC} -Wall -o totp_test totp_test.c -I../include -L ../lib/ -lmtcrypto
 
 
 
+
+echo ""
+echo "Testing AES-256 ..."
+${CC} -std=c11 -Wall -Wextra -Wpedantic -o aes_256_test aes_256_test.c -I../include -L ../lib/ -lmtcrypto || exit 1
+./aes_256_test || exit 1
+
+echo ""
+echo "Testing AES-256-GCM ..."
+${CC} -std=c11 -Wall -Wextra -Wpedantic -o aes_256_gcm_test aes_256_gcm_test.c -I../include -L ../lib/ -lmtcrypto || exit 1
+./aes_256_gcm_test || exit 1
